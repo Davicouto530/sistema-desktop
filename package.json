@@ -1,0 +1,23 @@
+{
+  "name": "sistema-desktop",
+  "version": "1.0.0",
+  "description": "Desenvolvimento de sistema desktop para a gestão de ordem de serviço de uma assistência técinca de computadores e notebooks.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Davicouto530/sistema-desktop.git"
+  },
+  "author": "Davi do couto",
+  "license": "MIT ",
+  "bugs": {
+    "url": "https://github.com/Davicouto530/sistema-desktop/issues"
+  },
+  "homepage": "https://github.com/Davicouto530/sistema-desktop#readme",
+  "devDependencies": {
+    "electron": "^34.2.0"
+  }
+}
