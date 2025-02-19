@@ -12,17 +12,31 @@
     <link rel="stylesheet" href="../public/css/bootstrap.min.css">
 
     <!-- CSS Personalizado -->
-     <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="../public/css/style.css">
+
+    <!--Impedir a execução de scripts externos ou não autorizados-->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' ">
+
+
 </head>
 
 <body>
 
-    <div class="container">
-        <h1>Hello Electron</h1>
+    <div class="container button">
+        <img src="../public/img/clientes.png" alt="Clientes" title="Cadastro de clientes">
+
+        <img src="../public/img/os.png" alt="Computador" title="Emissão de OS">
     </div>
-    
+
+    <footer>
+        <p id="dataAtual"></p>
+    </footer>
+
     <!--Bootstrap-->
     <script src="../public/js/bootstrap.min.js"></script>
+
+    <!-- Javascript Personalizado -->
+    <script src="../public/js/script.js"></script>
 </body>
 
 </html>

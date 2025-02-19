@@ -1,6 +1,6 @@
 console.log("Processo principal")
 
-const { app, BrowserWindow, nativeTheme } = require('electron')
+const { app, BrowserWindow, nativeTheme, Menu } = require('electron')
 
 //Janela principal
 let win
@@ -15,7 +15,36 @@ const createWindow = () => {
         resizable: false,
     })
 
+    //Menu personalizado
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+
     win.loadFile('./src/views/index.html')
+}
+
+//Janela sobre
+function aboutWindow() {
+    nativeTheme.themeSource = 'light'
+
+    //A linha abaixo obtem a janela principal
+    const main = BrowserWindow.getFocusedWindow()
+
+    let about
+
+    //Estabelecer uma relação hierarquica sobre janela
+    if (main) {
+        //Criar a janela sobre
+        about = new BrowserWindow({
+            width: 360,
+            height: 220,
+            autoHideMenuBar: true,
+            resizable: false,
+            minimizable: false,
+            parent: main,
+            modal: true
+        })
+    }
+    //Carreegar o documento HTML na janela
+    about.loadFile('./src/views/sobre.html')
 }
 
 //Iniciar aplicativo
@@ -38,3 +67,69 @@ app.on('window-all-closed', () => {
         app.quit()
     }
 })
+
+//Reduzir logs não criticos
+app.commandLine.appendSwitch('log-level', '3')
+
+//Templete do menu
+const template = [
+    {
+        label: 'Cadastro',
+        submenu: [
+            {
+                label: 'Cliente'
+            },
+            {
+                label: 'OS'
+            },
+            {
+                type: 'separator'
+            },
+            {
+                label: 'Sair',
+                click: () => app.quit(),
+                accelerator: 'Alt+F4'
+            }
+        ]
+    },
+    {
+        label: 'Relatório'
+    },
+    {
+        label: 'Ferramentas',
+        submenu: [
+            {
+                label: 'Aplicar zoom',
+                role: 'zoomin'
+            },
+            {
+                label: 'Reduzidir',
+                role: 'zoomOut'
+            },
+            {
+                label: 'Restaurar o zoom padrão',
+                role: 'resetZoom'
+            },
+            {
+                type: 'separator'
+            },
+            {
+                label: 'Recarregar',
+                role: 'reload'
+            },
+            {
+                label: 'Ferramenta do desenvolvedor',
+                role: 'toggleDevTools'
+            }
+        ]
+    },
+    {
+        label: 'Ajuda',
+        submenu: [
+            {
+                label: 'Sobre',
+                click: () => aboutWindow()
+            }
+        ]
+    }
+]
