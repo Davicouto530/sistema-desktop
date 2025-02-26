@@ -1,6 +1,9 @@
 console.log("Processo principal")
 
-const { app, BrowserWindow, nativeTheme, Menu } = require('electron')
+const { app, BrowserWindow, nativeTheme, Menu, ipcMain } = require('electron')
+
+//Esta linha está relacionado ao preload.js
+const path = require('node:path')
 
 //Janela principal
 let win
@@ -13,12 +16,27 @@ const createWindow = () => {
         // autoHideMenuBar: true,
         // minimizabl: false,
         resizable: false,
+
+        //Ativação do preload.js
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
     })
 
     //Menu personalizado
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 
     win.loadFile('./src/views/index.html')
+
+    //Recebimento dos pedidos do renderizador para abertura da janelas (botões), autorizados no preload.js
+    ipcMain.on ('cliente-window', () => {
+        clienteWindow()
+    })
+
+    ipcMain.on ('os-window', () => {
+        osWindow()
+    })
+
 }
 
 //Janela sobre
@@ -47,11 +65,45 @@ function aboutWindow() {
     about.loadFile('./src/views/sobre.html')
 }
 
-//Iniciar aplicativo
-app.whenReady().then(() => {
-    createWindow()
-})
+//Janela clientes
+let client
 
+function clienteWindow(){
+    nativeTheme.themeSource = 'light'
+    const main = BrowserWindow.getFocusedWindow()
+    if(main){
+        client = new BrowserWindow({
+            width: 1010,
+            height: 720,
+            //autoHideMenuBar: true,
+            parent: main,
+            modal: true
+        })
+    }
+    client.loadFile('./src/views/cliente.html')
+    client.center()//centralizar a tela
+}
+
+//Janela os
+let os
+
+function osWindow(){
+    nativeTheme.themeSource = 'light'
+    const main = BrowserWindow.getFocusedWindow()
+    if(main){
+        os = new BrowserWindow({
+            width: 1010,
+            height: 720,
+            //autoHideMenuBar: true,
+            parent: main,
+            modal: true
+        })
+    }
+    os.loadFile('./src/views/OS.html')
+    os.center()
+}
+
+//Iniciar aplicativo
 app.whenReady().then(() => {
     createWindow()
 
@@ -77,10 +129,15 @@ const template = [
         label: 'Cadastro',
         submenu: [
             {
-                label: 'Cliente'
+                label: 'Clientes',
+                click: () => clienteWindow()
             },
             {
-                label: 'OS'
+                label: 'OS',
+                click: () => osWindow()
+            },
+            {
+                label: 'Nome completo'
             },
             {
                 type: 'separator'
@@ -93,7 +150,18 @@ const template = [
         ]
     },
     {
-        label: 'Relatório'
+        label: 'Relatório',
+        submenu: [
+            {
+                label: 'Clientes'
+            },
+            {
+                label: 'OS aberta'
+            },
+            {
+                label: 'OS concluídas'
+            }
+        ]
     },
     {
         label: 'Ferramentas',
