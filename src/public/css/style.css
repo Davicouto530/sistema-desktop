@@ -27,10 +27,14 @@ footer{
     color: #fff;
     position: fixed;
     bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
 
 footer p {
     text-transform: uppercase;
     font-size: 13px;
-    margin-top: 5px;
+    margin-top: 15px;
 }

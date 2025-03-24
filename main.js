@@ -5,6 +5,9 @@ const { app, BrowserWindow, nativeTheme, Menu, ipcMain } = require('electron')
 //Esta linha está relacionado ao preload.js
 const path = require('node:path')
 
+//Importação dos métodos conectar o e desconecatr (do modulo de conexão)
+const {conectar,desconectar} = require("./database.js")
+
 //Janela principal
 let win
 const createWindow = () => {
@@ -122,6 +125,23 @@ app.on('window-all-closed', () => {
 
 //Reduzir logs não criticos
 app.commandLine.appendSwitch('log-level', '3')
+
+// Iniciar a conexão com o banco de dados
+ipcMain.on('db-conect', async (event)=> {
+    let conectado = await conectar()
+    if(conectado){
+        //Enviar uma mensagem para o renderizador troca o icone,
+        //criar um deplay de o.5s para sincronizar a nuvem
+        setTimeout(() => {
+            event.reply('db-status',"conectado")
+        })
+    }
+})
+
+// IMPORTANTE: desconectar do banco de dados quando a aplicação for encerrada
+app.on('before-quit', () => {
+    desconectar()
+});
 
 //Templete do menu
 const template = [
