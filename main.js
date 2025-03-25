@@ -6,7 +6,10 @@ const { app, BrowserWindow, nativeTheme, Menu, ipcMain } = require('electron')
 const path = require('node:path')
 
 //Importação dos métodos conectar o e desconecatr (do modulo de conexão)
-const {conectar,desconectar} = require("./database.js")
+const { conectar, desconectar } = require("./database.js")
+
+//Importação do schema cliente conectar e desconectar (módulo de conexão)
+const clientModel = require("./src/models/Clientes.js")
 
 //Janela principal
 let win
@@ -32,11 +35,11 @@ const createWindow = () => {
     win.loadFile('./src/views/index.html')
 
     //Recebimento dos pedidos do renderizador para abertura da janelas (botões), autorizados no preload.js
-    ipcMain.on ('cliente-window', () => {
+    ipcMain.on('client-window', () => {
         clienteWindow()
     })
 
-    ipcMain.on ('os-window', () => {
+    ipcMain.on('os-window', () => {
         osWindow()
     })
 
@@ -71,16 +74,20 @@ function aboutWindow() {
 //Janela clientes
 let client
 
-function clienteWindow(){
+function clienteWindow() {
     nativeTheme.themeSource = 'light'
     const main = BrowserWindow.getFocusedWindow()
-    if(main){
+    if (main) {
         client = new BrowserWindow({
             width: 1010,
             height: 720,
             //autoHideMenuBar: true,
             parent: main,
-            modal: true
+            modal: true,
+            //Ativação do preload.js
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js')
+            }
         })
     }
     client.loadFile('./src/views/cliente.html')
@@ -90,10 +97,10 @@ function clienteWindow(){
 //Janela os
 let os
 
-function osWindow(){
+function osWindow() {
     nativeTheme.themeSource = 'light'
     const main = BrowserWindow.getFocusedWindow()
-    if(main){
+    if (main) {
         os = new BrowserWindow({
             width: 1010,
             height: 720,
@@ -126,22 +133,23 @@ app.on('window-all-closed', () => {
 //Reduzir logs não criticos
 app.commandLine.appendSwitch('log-level', '3')
 
-// Iniciar a conexão com o banco de dados
-ipcMain.on('db-conect', async (event)=> {
+
+// iniciar a conexão com o banco de dados (pedido direto do preload.js)
+ipcMain.on('db-connect', async (event) => {
     let conectado = await conectar()
-    if(conectado){
-        //Enviar uma mensagem para o renderizador troca o icone,
-        //criar um deplay de o.5s para sincronizar a nuvem
+    // se conectado for igual a true
+    if (conectado) {
+        // enviar uma mensagem para o renderizador trocar o ícone
         setTimeout(() => {
-            event.reply('db-status',"conectado")
-        })
+            event.reply('db-status', "conectado")
+        }, 500)
     }
 })
 
-// IMPORTANTE: desconectar do banco de dados quando a aplicação for encerrada
+// IMPORTANTE! Desconectar do banco de dados quando a aplicação for encerrada
 app.on('before-quit', () => {
     desconectar()
-});
+})
 
 //Templete do menu
 const template = [
@@ -221,3 +229,37 @@ const template = [
         ]
     }
 ]
+
+// ===========================================================
+//Clientes - CRUD CREATE
+
+// Recebimento do objeto que contem os dados do cliente 
+ipcMain.on('new-client', async (event, client) => {
+    //Importante! Teste de recebimento dos dados do cliente
+    console.log(client)
+    // Cadastrar a  estrtura de dados no banco de dados no mongodb
+    try{
+        //Criar uma nova estrutura de dados usando a classe modelo
+        //Atenção! OS atributos precisam ser identicos ao modelo de dados clientes.js
+        //e os valores são definidos pelo conteúdo ao objeto client
+        const newClient = new clientModel({
+            nomeCliente: client.nameCli,
+            cpfCliente: client.cpfCli,
+            emailCliente: client.emailCli,
+            foneCliente: client.foneCli,
+            cepCliente: client.cepCli,
+            logradouroCliente: client.logfCli,
+            numeroCliente: client.numCli,
+            complementoCliente: client.complementoCli,
+            bairroCliente: client.bairroCli,
+            cidadeCliente: client.cidadeCli,
+            ufCliente: client.ufCli
+        })
+        //Salvar os dados dos clientes no banco de dados
+        await newClient.save()
+    }catch (error){
+        console.log(error)
+    }
+})
+
+//Fim - Clientes - CRUD CREATE==============================
