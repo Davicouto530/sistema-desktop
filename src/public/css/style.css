@@ -18,6 +18,15 @@
     cursor: pointer;
 }
 
+/*Logo*/
+#logo{
+    position: fixed;
+    bottom: 40px;
+    right: 5px;
+    border: none;
+    cursor: none;
+}
+
 /*Rodapé*/
 footer{
     width: 100%;
