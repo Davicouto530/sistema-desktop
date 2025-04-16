@@ -347,7 +347,7 @@ async function relatorioClientes() {
             if (y > 280) {
                 doc.addPage()
                 y = 20 //Resetar a variável y
-                 //redesenhar o cabeçalho
+                //redesenhar o cabeçalho
                 doc.text("Nome", 14, y)
                 doc.text("Telefone", 80, y)
                 doc.text("Email", 130, y)
@@ -360,15 +360,15 @@ async function relatorioClientes() {
             doc.text(c.nomeCliente, 14, y),
                 doc.text(c.emailCliente || "N/A", 130, y),
                 y += 10 //Quebra de linha
-        
+
         })
 
         //Adicionar numeração automática de páginas
         const paginas = doc.internal.getNumberOfPages()
-        for(let i  = 1; i <= paginas; i++){
+        for (let i = 1; i <= paginas; i++) {
             doc.setPage(i)
             doc.setFontSize(10)
-            doc.text(`Páginas ${i} de ${paginas}`, 105, 200, {align: 'center'})
+            doc.text(`Páginas ${i} de ${paginas}`, 105, 200, { align: 'center' })
         }
 
         //Definir o caminho do arquivo temporário
@@ -383,3 +383,32 @@ async function relatorioClientes() {
         console.log(error)
     }
 }
+
+//Crud Read ======================================================
+
+ipcMain.on('search-name', async (event, name) => {
+    console.log("teste IPC search-name")
+
+    //Passo 3 e 4: Busca dos dados do cliente no banco
+
+    //find({nomeCliente: name}) - busca pelo nome
+    //RegExp(name, i) - i (insensitive / Ignorar maiúsculo ou minúsculo)
+    try {
+        const dataClient  = await clientModel.find({
+            $or: [
+              { nomeClient: new RegExp(name, 'i') },
+              { cpfCliente: new RegExp(name, 'i') }
+            ]
+          })
+        console.log(dataClient)//Teste do pásso 3 e 4
+
+        //Passo 5: 
+        //Enviando os dados do cliente ao rendererCliente
+        //OBS: ipc só trabalha com string, então é necessario converter o JSON para JSON.stringify(dataClient)
+        event.reply('render-client', JSON.stringify(dataClient))
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+//Fim Crud Read ======================================================
